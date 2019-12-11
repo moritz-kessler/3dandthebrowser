@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Mystery Box</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+
+			body {
+				font-family: Monospace;
+				background-color: #ecf0f1;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<script src="js/libs/three.min.js"> // three.js - Core Framework </script>
+		<script src="js/libs/OrbitControls.js"> // three.js - Orbit controls extension </script>
+		<script src="js/libs/AssimpJSONLoader.js"> // three.js - Assimp JSONLoader extension </script>
+		<script src="js/libs/loaders/GLTFLoader.js"> // three.js - GLTF format loader extension</script>
+		<script src="js/libs/Detector.js"> // WebGl detector </script>
+
+		<script>
+
+			// Check if WebGl is available
+			if ( ! Detector.webgl ) {
+				Detector.addGetWebGLMessage();
+			}
+
+			// define global Variables
+			var lights = { point: [], ambient: undefined }, // light objects go here
+					renderer, camera,
+					scene, root,
+					envMap;
+
+			// Initialize Scene
+			init();
+
+			// Load meshes
+
+
+			// Start Displaying the scene
+			animate();
+
+			// Function to initialize the scene
+			function init() {
+
+				//defining a resize event
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			// Function when browser is resized
+			function onWindowResize( event ) {
+
+			}
+
+			// Function to start displaying the scene (per frame)
+			function animate() {
+
+				renderer.animate( render );
+
+			}
+
+			// Function containing our render logic
+			function render() {
+
+			}
+
+		</script>
+	</body>
+</html>

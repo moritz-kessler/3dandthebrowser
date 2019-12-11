@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Mystery Box</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+
+			body {
+
+				font-family: Monospace;
+				background-color: #ecf0f1;
+				margin: 0px;
+				overflow: hidden;
+
+			}
+
+		</style>
+	</head>
+	<body>
+		<script src="js/libs/three.min.js"> // three.js - Core Framework </script>
+		<script src="js/libs/controls/OrbitControls.js"> // three.js - Orbit controls extension </script>
+		<script src="js/libs/loaders/AssimpJSONLoader.js"> // three.js - Assimp JSONLoader extension </script>
+		<script src="js/libs/loaders/GLTFLoader.js"></script>
+		<script src="js/libs/Detector.js"> // WebGl detector </script>
+		<script src="js/libs/vr/WebVR.js"></script>
+		<script>
+
+			// Check if WebGl is available
+
+			if ( ! Detector.webgl ) {
+				Detector.addGetWebGLMessage();
+			}
+
+			// define global Variables
+
+			var lights = { point:[] },
+				camera, scene, root, renderer,
+				//loader = new THREE.AssimpJSONLoader(),
+				loader = new THREE.GLTFLoader(),
+				envMap;
+
+			// Initialize Scene
+
+			init();
+
+			// Load models
+
+			// load models from clara.io json files
+			/*(new THREE.ObjectLoader()).load("meshes/materialtestsuite.json", function ( rootData ) {
+				 root.scale.x = root.scale.y = root.scale.z = 1;
+				 root.add( rootData );
+			} );*/
+
+			// model
+			var loader = new THREE.GLTFLoader();
+			var selected3DModel;
+			loader.load( './meshes/mysteryBox.glb', function ( gltf ) {
+				console.log(gltf);
+
+				gltf.scene.scale.x = gltf.scene.scale.y = gltf.scene.scale.z = 2;
+				gltf.scene.traverse( function ( child ) {
+					// find the root object of the scene
+					if( child.name === "root" ){
+						selected3DModel = child;
+					}
+					// is the child a mesh?
+					if ( child.isMesh ) {
+						if(child.name === "worldSphere"){
+							child.material.wireframe = true;
+						}else if(child.name === "sphere"){
+							child.material.transparent = true;
+							child.material.opacity = 0.95;
+						} else if(child.name === "mysteryBox"){
+							/*child.material.color = new THREE.Color( 0x111111 );
+							child.material.metallness = 1;
+							child.material.roughness = 0.05;
+							child.material.envMap = envMap;
+							child.material.aoMapIntensity = 0;*/
+						}
+					}
+				} );
+
+				root.add( gltf.scene );
+				root.updateMatrix();
+			} );
+
+			/*
+			loader.load( './meshes/globus.glb', function ( gltf ) {
+				console.log(gltf);
+
+				gltf.scene.scale.x = gltf.scene.scale.y = gltf.scene.scale.z = 0.025;
+				gltf.scene.traverse( function ( child ) {
+					if ( child.isMesh ) {
+						if(child.name === "globus_low"){
+							selected3DModel = child;
+							child.rotation.z = 0.349066;
+							child.position.x -= 0.29;
+							child.position.y -= .05;
+						}
+						child.material.envMap = envMap;
+						//child.material.envMapIntensity = 0;
+						child.material.aoMapIntensity = 0;
+					}
+				} );
+
+				root.add( gltf.scene );
+				root.updateMatrix();
+			} );
+			*/
+
+			/*
+			loader.load( './meshes/globe_centered.json', function ( rootData ) {
+				console.log(rootData);
+
+				root.add( rootData );
+				root.scale.x = root.scale.y = root.scale.z = 0.05;
+				root.updateMatrix();
+
+				var objects = [];
+				objects = rootData.children;
+				//objects[1].children[0].children[0].children[0].material.transparent = true;
+				//objects[1].children[0].children[0].children[0].material.opacity = 0.95;
+				//objects[2].children[0].children[0].children[0].material.wireframe = true;
+
+				rootData.traverse( function ( child ) {
+					if ( child.isMesh ) {
+
+						if( child.material.name === "stand" ){
+							child.material = new THREE.MeshStandardMaterial();
+							var occlusionRoughnessMetallic = new THREE.TextureLoader().load( "textures/stand_occlusionRoughnessMetallic.png" );
+							child.material.map = new THREE.TextureLoader().load( "textures/stand_baseColor.png" );
+							child.material.roughnessMap = occlusionRoughnessMetallic;
+							child.material.metallnessMap = occlusionRoughnessMetallic;
+							child.material.aoMap = occlusionRoughnessMetallic;
+							child.material.normalMap = new THREE.TextureLoader().load( "textures/stand_normal.png" );
+						}else if( child.material.name === "globe" ){
+							child.material = new THREE.MeshStandardMaterial();
+							var occlusionRoughnessMetallic = new THREE.TextureLoader().load( "textures/globe_occlusionRoughnessMetallic.png" );
+							child.material.map = new THREE.TextureLoader().load( "textures/globe_baseColor.png" );
+							child.material.roughnessMap = occlusionRoughnessMetallic;
+							child.material.metallnessMap = occlusionRoughnessMetallic;
+							child.material.aoMap = occlusionRoughnessMetallic;
+							child.material.normalMap = new THREE.TextureLoader().load( "textures/globe_normal.png" );
+						}
+						child.material.aoMapIntensity = 0;
+						child.material.roughness = 1;
+						child.material.metallness = 1;
+						//child.material.map = texture;
+						child.material.envMap = envMap;
+					}
+				} );
+
+			} );
+			*/
+
+			// Start Animation
+
+			animate();
+
+			/*
+			(new THREE.ObjectLoader()).load("meshes/mysterybox.json", function ( rootData ) {
+				root.scale.x = root.scale.y = root.scale.z = 1;
+				rootData.traverse( function ( child ) {
+					if ( child.isMesh ) {
+						child.geometry.computeFlatVertexNormals();
+
+						if(child.name === "worldSphere"){
+							child.material.wireframe = true;
+						}else if(child.name === "sphere"){
+							child.material.transparent = true;
+							child.material.opacity = 0.95;
+						}else if(child.name === "mysteryBox"){
+
+						}
+					}
+				});
+				root.add( rootData );
+			} );
+			*/
+
+			function init() {
+
+				//Camera
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.2, 2000 );
+				camera.position.set( 0, 0, 10 );
+
+				//Controls
+				controls = new THREE.OrbitControls( camera );
+
+				//Scene
+				scene = new THREE.Scene();
+				scene.fog = new THREE.FogExp2( 0xecf0f1, 0.035 );
+
+				//Root
+				root = new THREE.Object3D();
+				scene.add( root );
+
+				// Lights
+				//scene.add( new THREE.AmbientLight( 0xcccccc ) );
+				lights.point[0] = new THREE.PointLight( 0xaaaaaa );
+				scene.add( lights.point[0] );
+
+				light = new THREE.HemisphereLight( 0xbbbbff, 0x444422 );
+				light.position.set( 0, 1, 0 );
+				scene.add( light );
+
+
+				// Renderer
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.gammaOutput = true;
+				renderer.setClearColor( 0xecf0f1 );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				// Events
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// envmap
+				var path = 'textures/cube/Bridge2/';
+				var format = '.jpg';
+				envMap = new THREE.CubeTextureLoader().load( [
+					path + 'posx' + format, path + 'negx' + format,
+					path + 'posy' + format, path + 'negy' + format,
+					path + 'posz' + format, path + 'negz' + format
+				] );
+				//scene.background = envMap;
+			}
+
+			//
+
+			function onWindowResize( event ) {
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+			}
+
+			//
+
+			function animate() {
+
+				renderer.animate( render );
+
+			}
+
+			//
+
+			function render() {
+
+				lights.point[0].rotation.copy( camera.rotation );
+				lights.point[0].position.copy( camera.position );
+
+				if( controls.state == controls.STATES.NONE ){
+
+					//root.rotation.x += 0.005;
+					//root.rotation.y += 0.005;
+
+					if(!!selected3DModel){
+						selected3DModel.rotateY(Math.PI/1000);
+					}
+				}
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
